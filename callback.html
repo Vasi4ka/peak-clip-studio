@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Authorization return page for Peak Clip Studio.">
+  <title>Authorization complete — Peak Clip Studio</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    .card { border:1px solid var(--line); background:rgba(16,20,27,.78); border-radius:20px; padding:30px; margin:18px 0; }
+    .field { margin:18px 0 0; }
+    .field label { display:block; color:var(--muted); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+    .value { display:flex; gap:10px; align-items:stretch; }
+    .value code { flex:1; min-width:0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;
+      background:#0a0d13; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92rem;
+      overflow-wrap:anywhere; line-height:1.5; }
+    button { border:0; border-radius:12px; padding:0 18px; font-weight:700; cursor:pointer; white-space:nowrap;
+      background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#071016; }
+    button:active { transform:translateY(1px); }
+    .bad { color:#ff9a9a; }
+    ol { color:var(--muted); line-height:1.8; padding-left:20px; }
+  </style>
+</head>
+<body>
+  <main class="shell legal">
+    <nav aria-label="Primary navigation">
+      <a class="brand" href="index.html"><span class="mark">P</span> Peak Clip Studio</a>
+      <div class="links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div>
+    </nav>
+
+    <header>
+      <p class="eyebrow">AUTHORIZATION RETURN</p>
+      <h1>Almost there.</h1>
+      <p class="lead">This page only shows what the platform sent back so you can paste it into the application running on your own computer. Nothing on this page is stored or sent anywhere.</p>
+    </header>
+
+    <div class="card" id="result">
+      <p class="lead" id="empty">Open this page through the authorization flow — there is nothing to show when you visit it directly.</p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">What to do next</h2>
+      <ol>
+        <li>Copy the full address above.</li>
+        <li>Open Peak Clip Studio, go to the <strong>Conturi</strong> tab.</li>
+        <li>Paste it into the field of the account you are connecting and press <strong>Finalizează</strong>.</li>
+      </ol>
+    </div>
+
+    <footer>
+      <a href="index.html">Home</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get('code');
+      var state = params.get('state');
+      var error = params.get('error');
+      var described = params.get('error_description');
+      var box = document.getElementById('result');
+      if (!code && !error) return;
+
+      function field(label, value, mono) {
+        var wrap = document.createElement('div');
+        wrap.className = 'field';
+        var title = document.createElement('label');
+        title.textContent = label;
+        var row = document.createElement('div');
+        row.className = 'value';
+        var slot = document.createElement('code');
+        slot.textContent = value;
+        var copy = document.createElement('button');
+        copy.type = 'button';
+        copy.textContent = 'Copy';
+        copy.addEventListener('click', function () {
+          navigator.clipboard.writeText(value).then(function () {
+            copy.textContent = 'Copied';
+            setTimeout(function () { copy.textContent = 'Copy'; }, 1600);
+          }, function () {
+            copy.textContent = 'Select it manually';
+          });
+        });
+        row.appendChild(slot);
+        row.appendChild(copy);
+        wrap.appendChild(title);
+        wrap.appendChild(row);
+        return wrap;
+      }
+
+      box.innerHTML = '';
+      if (error) {
+        var title = document.createElement('h2');
+        title.className = 'bad';
+        title.style.marginTop = '0';
+        title.textContent = 'The platform refused the authorization';
+        var detail = document.createElement('p');
+        detail.className = 'lead';
+        detail.textContent = described || error;
+        box.appendChild(title);
+        box.appendChild(detail);
+        return;
+      }
+
+      var heading = document.createElement('h2');
+      heading.style.marginTop = '0';
+      heading.textContent = 'Authorization received';
+      box.appendChild(heading);
+      box.appendChild(field('Full address — paste this one', window.location.href));
+      box.appendChild(field('Code', code));
+      if (state) box.appendChild(field('State', state));
+    })();
+  </script>
+</body>
+</html>
